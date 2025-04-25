@@ -1,83 +1,135 @@
+
 import './App.css';
 import React, { useState } from 'react';
 import CalendarGrid from './Components/CalendarGrid';
 import EventForm from './Components/EventForm';
-import { addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
+import { addMonths, subMonths } from 'date-fns';
+import { format } from 'date-fns';
+import { isSameDay as dateFnsIsSameDay } from 'date-fns';
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState('month'); // 'day', 'week', 'month'
   const [events, setEvents] = useState([]);
-  const [isEventFormOpen, setIsEventFormOpen] = useState(false); // for opening event form modal
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    date: '',
+    time: '',
+  });
 
-  const handlePrev = () => {
-    if (view === 'day') setCurrentDate(subDays(currentDate, 1));
-    else if (view === 'week') setCurrentDate(subWeeks(currentDate, 1));
-    else if (view === 'month') setCurrentDate(subMonths(currentDate, 1));
+  // State to keep track of the selected day
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const handlePrevMonth = () => {
+    setCurrentDate(subMonths(currentDate, 1)); // Go to previous month
   };
 
-  const handleNext = () => {
-    if (view === 'day') setCurrentDate(addDays(currentDate, 1));
-    else if (view === 'week') setCurrentDate(addWeeks(currentDate, 1));
-    else if (view === 'month') setCurrentDate(addMonths(currentDate, 1));
+  const handleNextMonth = () => {
+    setCurrentDate(addMonths(currentDate, 1)); // Go to next month
   };
 
   const handleToday = () => {
-    setCurrentDate(new Date());
+    setCurrentDate(new Date()); // Go to today's date
   };
 
-  const handleAddEvent = (event) => {
-    setEvents((prevEvents) => [...prevEvents, event]);
-    setIsEventFormOpen(false); // close form after adding event
+  const handleDeleteEvent = (id) => {
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      setEvents((prevEvents) => prevEvents.filter((e) => e.id !== id));
+    }
   };
 
-  const handleDeleteEvent = (eventToDelete) => {
-    setEvents((prevEvents) => prevEvents.filter((e) => e !== eventToDelete));
+  const handleAddEvent = (e) => {
+    e.preventDefault();
+    const { title, date, time } = formData;
+    if (!title || !date) return;
+
+    const dateTime = time ? `${date}T${time}` : date;
+
+    const newEvent = {
+      id: Date.now(), // simple unique id
+      title,
+      date: dateTime,
+    };
+
+    setEvents([...events, newEvent]);
+    setFormData({ title: '', date: '', time: '' });
+    setShowForm(false);
+  };
+
+  const isSameDay = (date1, date2) => {
+    return dateFnsIsSameDay(date1, date2);
   };
 
   return (
-    <div className="App">
-      <h1 className="Calendar">My Calendar App</h1>
+      <div className="App">
+        <h1 className="Calendar">My Calendar App</h1>
 
-      {/* Navigation Controls */}
-      <div className="NavigationControls flex">
-        <button onClick={handlePrev}>Prev</button>
-        <button onClick={handleToday}>Today</button>
-        <button onClick={handleNext}>Next</button>
-        {['day', 'week', 'month'].map((v) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className={view === v ? 'active' : ''}
-          >
-            {v.toUpperCase()}
-          </button>
-        ))}
-      </div>
+        {/* Display Current Month */}
+        <h2 className="month-title">
+          {format(currentDate, 'MMMM yyyy')}
+        </h2>
 
-      {/* Calendar Grid */}
-      <CalendarGrid
-        currentDate={currentDate}
-        view={view}
-        events={events}
-        onDeleteEvent={handleDeleteEvent}
-      />
+        {/* Navigation Controls */}
+        <div className="NavigationControls flex">
+          <button onClick={handlePrevMonth}>Prev Month</button>
+          <button onClick={handleToday}>Today</button>
+          <button onClick={handleNextMonth}>Next Month</button>
+        </div>
 
-      {/* Add Event Button */}
-      <button className="add-event-btn" onClick={() => setIsEventFormOpen(true)}>
-        Add Event
-      </button>
+        {/* Add Event Form Button */}
+        <button onClick={() => setShowForm(!showForm)} className="add-event-button">
+          {showForm ? 'Close' : 'Add Event'}
+        </button>
 
-      {/* Event Form */}
-      {isEventFormOpen && (
-        <EventForm
+        {showForm && (
+          <form onSubmit={handleAddEvent} className="event-form">
+            <input
+              type="text"
+              placeholder="Event Title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            />
+            <input
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            />
+            <input
+              type="time"
+              value={formData.time}
+              onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+            />
+            <button type="submit">Add</button>
+          </form>
+        )}
+
+        {/* Calendar Grid */}
+        <CalendarGrid
           currentDate={currentDate}
-          onAddEvent={handleAddEvent}
-          onClose={() => setIsEventFormOpen(false)}
+          events={events}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          onDeleteEvent={handleDeleteEvent}
         />
-      )}
-    </div>
-  );
+
+        {/* Display Events for the selected day */}
+        {selectedDate && (
+          <div className="events-list">
+            <h3>Events on {format(selectedDate, 'MMMM dd, yyyy')}</h3>
+            <ul>
+              {events
+                .filter((event) => isSameDay(new Date(event.date), selectedDate))
+                .map((event) => (
+                  <li key={event.id}>
+                    <div>{event.title}</div>
+                    <button onClick={() => handleDeleteEvent(event.id)}>Delete</button>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
 }
 
 export default App;
