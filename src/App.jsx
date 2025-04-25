@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CalendarGrid from './Components/CalendarGrid';
+import EventModal from './Components/EventModal';
 import {
   addDays,
   subDays,
@@ -14,8 +15,9 @@ function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState('week');
   const [events, setEvents] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Handle previous, next, and today navigation
+  // Navigation handlers
   const handlePrev = () => {
     if (view === 'day') setCurrentDate(subDays(currentDate, 1));
     else if (view === 'week') setCurrentDate(subWeeks(currentDate, 1));
@@ -32,48 +34,34 @@ function App() {
     setCurrentDate(new Date());
   };
 
-  // Add event to state
-  const addEvent = (date, title) => {
-    const newEvent = { id: Date.now(), title, date };  // Generating unique ID
+  // Add and delete events
+  const handleSaveEvent = (eventData) => {
+    const newEvent = {
+      id: Date.now(),
+      ...eventData,
+    };
     setEvents((prevEvents) => [...prevEvents, newEvent]);
+    setIsModalOpen(false);
   };
 
-  // Delete event from state
   const deleteEvent = (id) => {
     setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
   };
 
   return (
-    <div className="app">
-      <h1 className="Calendar text-2xl font-bold mb-4">My Calendar App</h1>
+    <div className="app p-4">
+      <h1 className="text-2xl font-bold mb-4">My Calendar App</h1>
 
       {/* Navigation & View Toggle */}
       <div className="app-controls mb-4 flex gap-2">
-        <button
-          onClick={handlePrev}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Prev
-        </button>
-        <button
-          onClick={handleToday}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Today
-        </button>
-        <button
-          onClick={handleNext}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Next
-        </button>
+        <button onClick={handlePrev} className="bg-gray-300 px-4 py-2 rounded">Prev</button>
+        <button onClick={handleToday} className="bg-gray-300 px-4 py-2 rounded">Today</button>
+        <button onClick={handleNext} className="bg-gray-300 px-4 py-2 rounded">Next</button>
 
         {['day', 'week', 'month'].map((v) => (
           <button
             key={v}
-            className={`px-4 py-2 rounded ${
-              view === v ? 'bg-blue-600 text-white' : 'bg-gray-200'
-            }`}
+            className={`px-4 py-2 rounded ${view === v ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
             onClick={() => setView(v)}
           >
             {v.toUpperCase()}
@@ -82,22 +70,29 @@ function App() {
       </div>
 
       {/* Calendar Grid */}
-      <CalendarGrid currentDate={currentDate} view={view} events={events} deleteEvent={deleteEvent} />
+      <CalendarGrid
+        currentDate={currentDate}
+        view={view}
+        events={events}
+        deleteEvent={deleteEvent}
+      />
 
-      {/* Add Event Button (for demonstration purposes) */}
+      {/* Add Event Button */}
       <div className="mt-4">
         <button
-          onClick={() =>
-            addEvent(
-              format(currentDate, 'yyyy-MM-dd'), // using current date
-              'New Event'
-            )
-          }
+          onClick={() => setIsModalOpen(true)}
           className="bg-green-500 text-white px-4 py-2 rounded"
         >
-          Add Event
+          Add New Event
         </button>
       </div>
+
+      {/* Event Modal */}
+      <EventModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveEvent}
+      />
     </div>
   );
 }
