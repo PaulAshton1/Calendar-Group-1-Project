@@ -1,10 +1,11 @@
 // components/Event.jsx
 import React from 'react';
 
-const Event = ({ event }) => {
+const Event = ({ event, onDeleteEvent }) => {
   return (
-    <div className="bg-blue-500 text-white rounded px-2 py-1 mt-1 text-xs cursor-pointer hover:bg-blue-600">
-      {event.title}
+    <div className="event">
+      <div>{event.title}</div>
+      <button onClick={() => onDeleteEvent(event)}>Delete</button>
     </div>
   );
 };

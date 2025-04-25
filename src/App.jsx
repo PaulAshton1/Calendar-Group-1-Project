@@ -1,21 +1,15 @@
+import './App.css';
 import React, { useState } from 'react';
 import CalendarGrid from './Components/CalendarGrid';
-import {
-  addDays,
-  subDays,
-  addWeeks,
-  subWeeks,
-  addMonths,
-  subMonths,
-  format,
-} from 'date-fns';
+import EventForm from './Components/EventForm';
+import { addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState('week');
+  const [view, setView] = useState('month'); // 'day', 'week', 'month'
   const [events, setEvents] = useState([]);
+  const [isEventFormOpen, setIsEventFormOpen] = useState(false); // for opening event form modal
 
-  // Handle previous, next, and today navigation
   const handlePrev = () => {
     if (view === 'day') setCurrentDate(subDays(currentDate, 1));
     else if (view === 'week') setCurrentDate(subWeeks(currentDate, 1));
@@ -32,49 +26,29 @@ function App() {
     setCurrentDate(new Date());
   };
 
-  // Add event to state
-  const addEvent = (date, title) => {
-    const newEvent = { id: Date.now(), title, date };  // Generating unique ID
-    setEvents((prevEvents) => [...prevEvents, newEvent]);
+  const handleAddEvent = (event) => {
+    setEvents((prevEvents) => [...prevEvents, event]);
+    setIsEventFormOpen(false); // close form after adding event
   };
 
-  // Delete event from state
-  const deleteEvent = (id) => {
-    setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
+  const handleDeleteEvent = (eventToDelete) => {
+    setEvents((prevEvents) => prevEvents.filter((e) => e !== eventToDelete));
   };
 
   return (
-    <div className="app">
-      <h1 className="Calendar text-2xl font-bold mb-4">My Calendar App</h1>
+    <div className="App">
+      <h1 className="Calendar">My Calendar App</h1>
 
-      {/* Navigation & View Toggle */}
-      <div className="app-controls mb-4 flex gap-2">
-        <button
-          onClick={handlePrev}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Prev
-        </button>
-        <button
-          onClick={handleToday}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Today
-        </button>
-        <button
-          onClick={handleNext}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Next
-        </button>
-
+      {/* Navigation Controls */}
+      <div className="NavigationControls flex">
+        <button onClick={handlePrev}>Prev</button>
+        <button onClick={handleToday}>Today</button>
+        <button onClick={handleNext}>Next</button>
         {['day', 'week', 'month'].map((v) => (
           <button
             key={v}
-            className={`px-4 py-2 rounded ${
-              view === v ? 'bg-blue-600 text-white' : 'bg-gray-200'
-            }`}
             onClick={() => setView(v)}
+            className={view === v ? 'active' : ''}
           >
             {v.toUpperCase()}
           </button>
@@ -82,22 +56,26 @@ function App() {
       </div>
 
       {/* Calendar Grid */}
-      <CalendarGrid currentDate={currentDate} view={view} events={events} deleteEvent={deleteEvent} />
+      <CalendarGrid
+        currentDate={currentDate}
+        view={view}
+        events={events}
+        onDeleteEvent={handleDeleteEvent}
+      />
 
-      {/* Add Event Button (for demonstration purposes) */}
-      <div className="mt-4">
-        <button
-          onClick={() =>
-            addEvent(
-              format(currentDate, 'yyyy-MM-dd'), // using current date
-              'New Event'
-            )
-          }
-          className="bg-green-500 text-white px-4 py-2 rounded"
-        >
-          Add Event
-        </button>
-      </div>
+      {/* Add Event Button */}
+      <button className="add-event-btn" onClick={() => setIsEventFormOpen(true)}>
+        Add Event
+      </button>
+
+      {/* Event Form */}
+      {isEventFormOpen && (
+        <EventForm
+          currentDate={currentDate}
+          onAddEvent={handleAddEvent}
+          onClose={() => setIsEventFormOpen(false)}
+        />
+      )}
     </div>
   );
 }

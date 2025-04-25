@@ -1,1 +1,98 @@
- 
+ /* General Styles */
+ .App {
+     max-width: 900px;
+     margin: 0 auto;
+     padding: 20px;
+ }
+
+ .NavigationControls {
+     display: flex;
+     justify-content: center;
+     gap: 15px;
+     margin-bottom: 20px;
+ }
+
+ .NavigationControls button {
+     padding: 10px;
+     font-size: 1rem;
+     cursor: pointer;
+ }
+
+ .calendar-grid {
+     display: grid;
+     grid-template-columns: repeat(7, 1fr);
+     grid-gap: 1px;
+ }
+
+ .calendar-header {
+     display: grid;
+     grid-template-columns: repeat(7, 1fr);
+     background-color: #f1f3f4;
+     padding: 10px 0;
+ }
+
+ .calendar-header div {
+     text-align: center;
+     font-weight: bold;
+     color: #5f6368;
+ }
+
+ .calendar-cell {
+     background-color: white;
+     padding: 10px;
+     min-height: 80px;
+     border: 1px solid #d3d4d8;
+     position: relative;
+ }
+
+ .date {
+     font-weight: bold;
+     font-size: 1.2rem;
+ }
+
+ .event {
+     background-color: #1a73e8;
+     color: white;
+     padding: 5px;
+     margin-top: 5px;
+     border-radius: 4px;
+ }
+
+ .event button {
+     background: none;
+     border: none;
+     color: white;
+     font-size: 0.75rem;
+     position: absolute;
+     top: 4px;
+     right: 4px;
+ }
+
+ .add-event-btn {
+     background-color: #1a73e8;
+     color: white;
+     padding: 8px 16px;
+     border-radius: 8px;
+     cursor: pointer;
+ }
+
+ .event-form {
+     margin-top: 20px;
+     background-color: #fff;
+     padding: 20px;
+     border-radius: 8px;
+     max-width: 400px;
+     margin: 0 auto;
+ }
+
+ .event-form input,
+ .event-form button {
+     width: 100%;
+     margin-bottom: 10px;
+ }
+
+ .event-form input,
+ .event-form button {
+     padding: 10px;
+     font-size: 1rem;
+ }

@@ -1,44 +1,49 @@
-// components/CalendarGrid.jsx
+
 import React from 'react';
-import { startOfWeek, addDays, format, isSameDay } from 'date-fns';
-import Event from './Event';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameDay,
+} from 'date-fns';
 
-function CalendarGrid({ currentDate, view, events }) {
-  const startDate = startOfWeek(currentDate, { weekStartsOn: 1 }); // Monday
 
-  const renderCells = () => {
-    const cells = [];
-    const daysToShow = view === 'month' ? 35 : view === 'week' ? 7 : 1;
-
-    for (let i = 0; i < daysToShow; i++) {
-      const day = addDays(startDate, i);
-      const dayEvents = events.filter((event) =>
-        isSameDay(new Date(event.date), day)
-      );
-
-      cells.push(
-        <div key={i} className="border p-2 h-32 relative">
-          <div className="text-xs font-medium">{format(day, 'EEE d')}</div>
-          {dayEvents.map((event, index) => (
-            <Event key={index} event={event} />
-          ))}
-        </div>
-      );
-    }
-
-    return cells;
-  };
+const CalendarGrid = ({ currentDate, events, onDeleteEvent }) => {
+  const start = startOfWeek(startOfMonth(currentDate));
+  const end = endOfWeek(endOfMonth(currentDate));
+  const days = eachDayOfInterval({ start, end });
 
   return (
-    <div
-      className={`grid gap-px bg-gray-300 ${
-        view === 'month' ? 'grid-cols-7' : 'grid-cols-1'
-      }`}
-    >
-      {renderCells()}
-    </div>
+    <>
+      <div className="calendar-header">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          <div key={day} className="header-cell">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="calendar-grid">
+        {days.map((day) => {
+          const dayEvents = events.filter((event) =>
+            isSameDay(new Date(event.date), day)
+          );
+
+          return (
+            <div key={day} className="calendar-cell">
+              <div className="date">{format(day, 'd')}</div>
+              {dayEvents.map((event, index) => (
+                <Event key={index} event={event} onDeleteEvent={onDeleteEvent} />
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
-}
+};
 
 export default CalendarGrid;
-
