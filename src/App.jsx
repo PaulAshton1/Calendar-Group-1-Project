@@ -1,40 +1,41 @@
-
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CalendarGrid from './Components/CalendarGrid';
-import EventForm from './Components/EventForm';
-import { addMonths, subMonths } from 'date-fns';
-import { format } from 'date-fns';
-import { isSameDay as dateFnsIsSameDay } from 'date-fns';
+import Header from './Components/Header';
+import Sidebar from './Components/Sidebar';
+import { addMonths, subMonths, format } from 'date-fns';
+import { isSameDay as dateFnsIsSameDay, parseISO } from 'date-fns';
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    date: '',
-    time: '',
-  });
-
-  // State to keep track of the selected day
+  const [formData, setFormData] = useState({ title: '', date: '', time: '' });
   const [selectedDate, setSelectedDate] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
 
-  const handlePrevMonth = () => {
-    setCurrentDate(subMonths(currentDate, 1)); // Go to previous month
-  };
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResult, setSearchResult] = useState(null);
 
-  const handleNextMonth = () => {
-    setCurrentDate(addMonths(currentDate, 1)); // Go to next month
-  };
+  const [goToDateInput, setGoToDateInput] = useState('');
 
-  const handleToday = () => {
-    setCurrentDate(new Date()); // Go to today's date
-  };
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+
+  const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+  const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+  const handleToday = () => setCurrentDate(new Date());
 
   const handleDeleteEvent = (id) => {
     if (window.confirm("Are you sure you want to delete this event?")) {
-      setEvents((prevEvents) => prevEvents.filter((e) => e.id !== id));
+      setEvents((prev) => prev.filter((e) => e.id !== id));
     }
   };
 
@@ -44,42 +45,199 @@ function App() {
     if (!title || !date) return;
 
     const dateTime = time ? `${date}T${time}` : date;
-
-    const newEvent = {
-      id: Date.now(), // simple unique id
-      title,
-      date: dateTime,
-    };
+    const newEvent = { id: Date.now(), title, date: dateTime };
 
     setEvents([...events, newEvent]);
     setFormData({ title: '', date: '', time: '' });
     setShowForm(false);
   };
 
-  const isSameDay = (date1, date2) => {
-    return dateFnsIsSameDay(date1, date2);
+  const openModal = (type) => {
+    setModalType(type);
+    setModalOpen(true);
+    setSearchQuery('');
+    setSearchResult(null);
+    setGoToDateInput('');
+  };
+
+  const handleAllEvents = () => {
+    if (events.length === 0) {
+      alert("No events yet, Click on Add Event to create one");
+    } else {
+      openModal('allEvents');
+    }
+  };
+
+  const handleSearchEvents = () => {
+    openModal('search');
+  };
+
+  const handleClearAllEvents = () => {
+    openModal('clearConfirm');
+  };
+
+  const handleSettings = () => {
+    openModal('settings');
+  };
+
+  const handleGoToDate = () => {
+    openModal('goToDate');
+  };
+
+  const handleYearView = () => {
+    openModal('yearView');
+  };
+
+  const searchEvent = () => {
+    const found = events.find((e) =>
+      e.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    if (found) {
+      setSelectedDate(parseISO(found.date));
+      setSearchResult(found);
+    } else {
+      setSearchResult(null);
+      alert("Event not found");
+    }
+  };
+
+  const goToDate = () => {
+    const parsedDate = new Date(goToDateInput);
+    if (!isNaN(parsedDate)) {
+      setCurrentDate(parsedDate);
+      setModalOpen(false);
+    } else {
+      alert("Invalid date format. Please use YYYY-MM-DD.");
+    }
+  };
+
+  const confirmClearEvents = () => {
+    setEvents([]);
+    setModalOpen(false);
+  };
+
+  const isSameDay = (d1, d2) => dateFnsIsSameDay(d1, d2);
+
+  const Modal = () => {
+    if (!modalOpen) return null;
+
+    return (
+      <div className="modal-overlay">
+        <div className="modal">
+          <button className="close-btn" onClick={() => setModalOpen(false)}>X</button>
+
+          {modalType === 'allEvents' && (
+            <>
+              <h2>All Events</h2>
+              {events.map((event) => (
+                <div key={event.id}>
+                  <strong>{event.title}</strong> on {format(new Date(event.date), 'PPpp')}
+                </div>
+              ))}
+            </>
+          )}
+
+          {modalType === 'search' && (
+            <>
+              <h2>Search Event</h2>
+              <input
+                type="text"
+                placeholder="Enter event name"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button onClick={searchEvent}>Search</button>
+
+              {searchResult && (
+                <div className="search-result">
+                  <h3>Found Event</h3>
+                  <p><strong>{searchResult.title}</strong> on {format(new Date(searchResult.date), 'PPpp')}</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {modalType === 'clearConfirm' && (
+            <>
+              <h2>Clear All Events</h2>
+              <p>This will erase all your events. Are you sure?</p>
+              <button onClick={confirmClearEvents}>Yes, clear all</button>
+              <button onClick={() => setModalOpen(false)}>Cancel</button>
+            </>
+          )}
+
+          {modalType === 'settings' && (
+            <>
+              <h2>Settings</h2>
+              <p>No specific settings yet.</p>
+            </>
+          )}
+
+          {modalType === 'goToDate' && (
+            <>
+              <h2>Go to Date</h2>
+              <input
+                type="date"
+                value={goToDateInput}
+                onChange={(e) => setGoToDateInput(e.target.value)}
+              />
+              <button onClick={goToDate}>Go!</button>
+            </>
+          )}
+
+          {modalType === 'yearView' && (
+            <>
+              <h2>Year Overview: {currentDate.getFullYear()}</h2>
+              <div className="year-grid">
+                {[
+                  'January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'
+                ].map((month, index) => (
+                  <div key={index} className="month-box">
+                    <h3>{month}</h3>
+                    <div className="month-dates">
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                        <div className="day-box" key={day}>
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
-      <div className="App">
-        <h1 className="Calendar">My Calendar App</h1>
+    <div className="App layout">
+      <Sidebar
+        onToday={handleToday}
+        onYearView={handleYearView}
+        onGoToDate={handleGoToDate}
+        onAddEventClick={() => setShowForm(!showForm)}
+        onAllEvents={handleAllEvents}
+        onSearchEvents={handleSearchEvents}
+        onClearAllEvents={handleClearAllEvents}
+        onSettings={handleSettings}
+        remindersEnabled={false}
+        setRemindersEnabled={() => { }}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+      />
 
-        {/* Display Current Month */}
-        <h2 className="month-title">
-          {format(currentDate, 'MMMM yyyy')}
-        </h2>
-
-        {/* Navigation Controls */}
-        <div className="NavigationControls flex">
-          <button onClick={handlePrevMonth}>Prev Month</button>
-          <button onClick={handleToday}>Today</button>
-          <button onClick={handleNextMonth}>Next Month</button>
-        </div>
-
-        {/* Add Event Form Button */}
-        <button onClick={() => setShowForm(!showForm)} className="add-event-button">
-          {showForm ? 'Close' : 'Add Event'}
-        </button>
+      <div className="main-content">
+        <Header
+          currentDate={currentDate}
+          handlePrevMonth={handlePrevMonth}
+          handleNextMonth={handleNextMonth}
+          handleToday={handleToday}
+          showForm={showForm}
+          setShowForm={setShowForm}
+        />
 
         {showForm && (
           <form onSubmit={handleAddEvent} className="event-form">
@@ -103,7 +261,6 @@ function App() {
           </form>
         )}
 
-        {/* Calendar Grid */}
         <CalendarGrid
           currentDate={currentDate}
           events={events}
@@ -112,24 +269,15 @@ function App() {
           onDeleteEvent={handleDeleteEvent}
         />
 
-        {/* Display Events for the selected day */}
-        {selectedDate && (
-          <div className="events-list">
-            <h3>Events on {format(selectedDate, 'MMMM dd, yyyy')}</h3>
-            <ul>
-              {events
-                .filter((event) => isSameDay(new Date(event.date), selectedDate))
-                .map((event) => (
-                  <li key={event.id}>
-                    <div>{event.title}</div>
-                    <button onClick={() => handleDeleteEvent(event.id)}>Delete</button>
-                  </li>
-                ))}
-            </ul>
-          </div>
-        )}
+        <Modal />
       </div>
-    );
+    </div>
+  );
 }
 
 export default App;
+
+
+
+
+

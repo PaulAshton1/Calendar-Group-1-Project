@@ -2,7 +2,7 @@ import Event from './Event';
 import React from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 
-const CalendarGrid = ({ currentDate, events, selectedDate, setSelectedDate, onDeleteEvent }) => {
+const CalendarGrid = ({ currentDate, events, selectedDate, setSelectedDate, onDeleteEvent, onAddEvent }) => {
   // Get the start and end of the current month
   const startOfCurrentMonth = startOfMonth(currentDate);
   const endOfCurrentMonth = endOfMonth(currentDate);
@@ -13,6 +13,18 @@ const CalendarGrid = ({ currentDate, events, selectedDate, setSelectedDate, onDe
 
   // Get all days in the range from start to end
   const days = eachDayOfInterval({ start, end });
+
+  // Handle day click
+  const handleDayClick = (day) => {
+    const dayEvents = events.filter((event) => isSameDay(new Date(event.date), day));
+
+    // Show an alert if no event is found for the clicked day
+    if (dayEvents.length === 0) {
+      alert("No event, click on add event to create one");
+    }
+
+    setSelectedDate(day); // Set the selected date
+  };
 
   return (
     <div className="calendar">
@@ -38,22 +50,30 @@ const CalendarGrid = ({ currentDate, events, selectedDate, setSelectedDate, onDe
             <div
               key={day}
               className={`calendar-cell ${isSameDay(day, new Date()) ? 'today' : ''} ${isSameDay(day, selectedDate) ? 'selected' : ''}`}
-              onClick={() => setSelectedDate(day)} // Set selected date on click
+              onClick={() => handleDayClick(day)} // Set selected date on click
             >
               <div className="date">{format(day, 'd')}</div>
-              {dayEvents.map((event, index) => (
+              {dayEvents.length > 0 && dayEvents.map((event, index) => (
                 <div key={index} className="DayEvent">
                   <span>{event.title}</span>
-                  <button onClick={() => onDeleteEvent(event.id)}>🗑️</button>
+                  <button onClick={(e) => { e.stopPropagation(); onDeleteEvent(event.id); }}>🗑️</button>
                 </div>
               ))}
             </div>
           );
         })}
       </div>
+
+      {/* Add Event Button (visible if there are no events for the selected day) */}
+      {selectedDate && events.filter((event) => isSameDay(new Date(event.date), selectedDate)).length === 0 && (
+        <button onClick={() => onAddEvent(selectedDate)} className="add-event-button">
+          Add Event
+        </button>
+      )}
     </div>
   );
 };
 
 export default CalendarGrid;
+
 
