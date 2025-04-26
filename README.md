@@ -3,6 +3,9 @@
 ## Project Overview
 This project is a collaborative effort by Group 1 to create a functional and user-friendly calendar application. The goal is to provide users with an intuitive interface to manage their schedules, events, and tasks efficiently.
 
+## Deployment
+The application is deployed and accessible at [time-managment-app.netlify.app](https://time-managment-app.netlify.app).
+
 ## Features Implemented
 - **Event Creation and Management**: Users can add, edit, and delete events.
 - **Task Scheduling**: Ability to schedule tasks with deadlines.
