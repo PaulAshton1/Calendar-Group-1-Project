@@ -1,12 +1,48 @@
-# React + Vite
+# Calendar Group 1 Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project Overview
+This project is a collaborative effort by Group 1 to create a functional and user-friendly calendar application. The goal is to provide users with an intuitive interface to manage their schedules, events, and tasks efficiently.
 
-Currently, two official plugins are available:
+## Features Implemented
+- **Event Creation and Management**: Users can add, edit, and delete events.
+- **Task Scheduling**: Ability to schedule tasks with deadlines.
+- **Monthly and Weekly Views**: Calendar displays for both monthly and weekly formats.
+- **Reminders**: Notifications for upcoming events and tasks.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+## Technologies Used
+- **Frontend**: HTML, CSS, JavaScript
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB
+- **Version Control**: Git and GitHub for collaboration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## How to Run the Project
+1. Clone the repository:
+    ```bash
+    git clone <repository-url>
+    ```
+2. Navigate to the project directory:
+    ```bash
+    cd Calender-Group-1-Project
+    ```
+3. Install dependencies:
+    ```bash
+    npm install
+    ```
+4. Start the application:
+    ```bash
+    npm start
+    ```
+5. Open your browser and navigate to `http://localhost:3000`.
+
+## Contributors
+-Valarie Jepleting
+-Muhammad Awadh
+-Paul Ashton
+## Future Enhancements
+- Integration with third-party calendar services.
+- Mobile application support.
+- Advanced analytics for event tracking.
+
+## License
+This project is licensed under the [MIT License](LICENSE).
