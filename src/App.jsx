@@ -68,25 +68,11 @@ function App() {
     }
   };
 
-  const handleSearchEvents = () => {
-    openModal('search');
-  };
-
-  const handleClearAllEvents = () => {
-    openModal('clearConfirm');
-  };
-
-  const handleSettings = () => {
-    openModal('settings');
-  };
-
-  const handleGoToDate = () => {
-    openModal('goToDate');
-  };
-
-  const handleYearView = () => {
-    openModal('yearView');
-  };
+  const handleSearchEvents = () => openModal('search');
+  const handleClearAllEvents = () => openModal('clearConfirm');
+  const handleSettings = () => openModal('settings');
+  const handleGoToDate = () => openModal('goToDate');
+  const handleYearView = () => openModal('yearView');
 
   const searchEvent = () => {
     const found = events.find((e) =>
@@ -126,9 +112,12 @@ function App() {
         <div className="modal">
           <button className="close-btn" onClick={() => setModalOpen(false)}>X</button>
 
+          {modalType !== 'settings' && modalType !== 'yearView' && (
+            <h2>{modalType.charAt(0).toUpperCase() + modalType.slice(1)}</h2>
+          )}
+
           {modalType === 'allEvents' && (
             <>
-              <h2>All Events</h2>
               {events.map((event) => (
                 <div key={event.id}>
                   <strong>{event.title}</strong> on {format(new Date(event.date), 'PPpp')}
@@ -139,7 +128,6 @@ function App() {
 
           {modalType === 'search' && (
             <>
-              <h2>Search Event</h2>
               <input
                 type="text"
                 placeholder="Enter event name"
@@ -159,7 +147,6 @@ function App() {
 
           {modalType === 'clearConfirm' && (
             <>
-              <h2>Clear All Events</h2>
               <p>This will erase all your events. Are you sure?</p>
               <button onClick={confirmClearEvents}>Yes, clear all</button>
               <button onClick={() => setModalOpen(false)}>Cancel</button>
@@ -175,7 +162,6 @@ function App() {
 
           {modalType === 'goToDate' && (
             <>
-              <h2>Go to Date</h2>
               <input
                 type="date"
                 value={goToDateInput}
@@ -205,6 +191,8 @@ function App() {
                   </div>
                 ))}
               </div>
+             <button className="back-btn" onClick={() => setModalOpen(false)}>Back</button>
+
             </>
           )}
         </div>
@@ -276,8 +264,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
