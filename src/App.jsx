@@ -8,7 +8,6 @@ import {
   subWeeks,
   addMonths,
   subMonths,
-  format,
 } from 'date-fns';
 
 function App() {
